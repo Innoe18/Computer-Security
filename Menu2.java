@@ -24,7 +24,7 @@ public class Menu2 {
  */
 
      public static void runMenu() {
-        Scanner scanner = new Scanner(System.in); // Use a single scanner instance
+        Scanner scanner = new Scanner(System.in); 
         int choice;
 
         while (true) {
@@ -35,7 +35,7 @@ public class Menu2 {
                 System.out.println("3. Quit the application");
                 System.out.print("Choose an option: ");
                 choice = scanner.nextInt();
-                scanner.nextLine(); // Consume the newline character
+                scanner.nextLine(); 
 
                 switch (choice) {
                     case 1:
@@ -58,7 +58,7 @@ public class Menu2 {
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input! Please enter a number between 1 and 3.");
-                scanner.nextLine(); // Clear the invalid input
+                scanner.nextLine(); 
             } catch (Exception e) {
                 System.out.println("An unexpected error occurred: " + e.getMessage());
             }
