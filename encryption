@@ -1,0 +1,88 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package compsecurityencryptionproject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.security.SecureRandom;
+import java.util.Base64;
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import java.util.Scanner;
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.IvParameterSpec;
+
+/**
+ *
+ * @author MyPC
+ */
+public class FromScretch {
+    public static final int LenghthOfKey = 256;
+    public static final int iterationCount = 65536;
+    
+    public static void main(String[] args) {
+        Menu2.runMenu();
+    }
+   public static void encrypt(Scanner scanner) {
+    System.out.println("Encryption method here");
+
+    try {
+        // user is prompted to enter name of the file they want to encrypt 
+        System.out.print("Enter the filename to encrypt: ");
+        String fileName = scanner.nextLine();
+        // if file is not found then a message saying that is displayed instead of the program crushing
+        File inputFile = new File(fileName);
+        if (!inputFile.exists()) {
+            System.out.println("File not found. Please provide a valid filename.");
+            return;
+        }
+
+       // im now generating  the IV to make sure that the encrypted message is always unique, even if the file contents and the key are the same.
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] iv = new byte[16];
+        secureRandom.nextBytes(iv);
+        IvParameterSpec ivspec = new IvParameterSpec(iv);
+
+        // this is where the secret key is generated using the AES algorithm 
+        
+       KeyGenerator keyGen = KeyGenerator.getInstance("AES");// creating a key generator object configured to generate keys that confirm to the AES standard 
+        keyGen.init(128); // Use 128-bit AES key
+        SecretKey secretKey = keyGen.generateKey(); //random secret key is generated and stored in secret key.
+
+        
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
+
+      
+        byte[] fileData = Files.readAllBytes(inputFile.toPath());
+
+       
+        byte[] cipherText = cipher.doFinal(fileData);
+
+       
+        byte[] encryptedData = new byte[iv.length + cipherText.length];
+        System.arraycopy(iv, 0, encryptedData, 0, iv.length);
+        System.arraycopy(cipherText, 0, encryptedData, iv.length, cipherText.length);
+
+       
+        try (FileOutputStream outputStream = new FileOutputStream("tryciphertext.txt")) {
+            outputStream.write(encryptedData);
+        }
+
+       
+        String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+        System.out.println("File encrypted successfully!");
+        System.out.println("Encryption key (copy the key to a safe file ): " + encodedKey);
+        System.out.println("Encrypted file name: tryciphertext.txt");
+
+    } catch (Exception e) {
+        System.out.println("An error occurred during file encryption: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+    }
+
