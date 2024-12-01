@@ -1,28 +1,20 @@
-/*
+
+ /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package compsecurityencryptionproject;
 
+package CA2;
+
+/**
+ *
+ * @author MyPC
+ */
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-/**
- *
- * @author MyPC
- */
 public class Menu2 {
-   /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-
-/**
- *
- * @author MyPC
- */
-
+  
      public static void runMenu() {
         Scanner scanner = new Scanner(System.in); 
         int choice;
@@ -39,17 +31,18 @@ public class Menu2 {
 
                 switch (choice) {
                     case 1:
-                        System.out.println("Your encryption mathod should be done here");
-                      FromScretch.encrypt(scanner);
+                        System.out.println("Your encryption begins :) ");
+                     encrypt.encrypt(scanner);
                         break;
 
                     case 2:
                         System.out.println("2. Decrypt a File");
-                        System.out.println("Your decryption method should be done here");
+                        System.out.println("Your decryption begins:) ");
+                        decrypt.decrypt(scanner);
                         break;
 
                     case 3:
-                        System.out.println("3. Quit the application");
+                        System.out.println("3.BYE :) ");
                         scanner.close();
                         return;
 
