@@ -23,51 +23,56 @@ public class decrypt {
         System.out.println("Decryption method here");
 
         try {
-           
+           //user is asked to enter the name of the file they want to decrypt 
             System.out.print("Enter the filename to decrypt: ");
             String encryptedFileName = scanner.nextLine();
 
-            
+            //creates a file object representing the encrypted file then checks if it exists 
             File encryptedFile = new File(encryptedFileName);
-            if (!encryptedFile.exists()) {
+            if (!encryptedFile.exists()) {// if file does not exist then message leting the user know is displayed and the program exits the method.
                 System.out.println("Encrypted file not found. Please provide a valid filename.");
                 return;
             }
 
-           
+           // if file is found user is asked to enter that base64 key 
             System.out.print("Enter the Base64-encoded key: ");
             String encodedKey = scanner.nextLine();
 
-           
+            // key is converted back to byte array
             byte[] keyBytes = Base64.getDecoder().decode(encodedKey);
+            // now the SecretKeySpec is used to reconstruct the SecretKey from the decoded byte array with AES specifying the algorithm
             SecretKey secretKey = new javax.crypto.spec.SecretKeySpec(keyBytes, "AES");
 
-            
+            //reads the entire file into a byte array
             byte[] encryptedData = Files.readAllBytes(encryptedFile.toPath());
 
-           
+            // the extraction of the iv takes place here 
+            // the first 16 bytes of the file represent the iv 
             byte[] iv = new byte[16];
+            // the bytes are copied into a new array called iv
             System.arraycopy(encryptedData, 0, iv, 0, iv.length);
+            //wraps the iv in a an IvParameterSpec object and prepares it for use in the decryption process 
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
-            
+            // now the remaining bytes in cipherText file are the encrypted message without the iv because its been extracted  
             byte[] cipherText = new byte[encryptedData.length - iv.length];
             System.arraycopy(encryptedData, iv.length, cipherText, 0, cipherText.length);
 
-            
+            // the  creation of  a Cipher object configured for AES encryption in CBC mode with PKCS5 padding.
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            // initializes the cipher for decryption  using the secret key and iv
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
 
-           
+           // the process is done and the original text is returned as a byte array 
             byte[] plainText = cipher.doFinal(cipherText);
 
-        
-            try (FileOutputStream outputStream = new FileOutputStream("decryptedfile.txt")) {
+         // now the plaintext is written on a file called plaintext
+            try (FileOutputStream outputStream = new FileOutputStream("plaintext.txt")) {
                 outputStream.write(plainText);
             }
-
+        //user is alerted that decryption has happened and the name of the file with the plain text 
             System.out.println("File decrypted successfully!");
-            System.out.println("Decrypted file name: decryptedfile.txt");
+            System.out.println("Decrypted file name: plaintext.txt");
 
         } catch (Exception e) {
             System.out.println("An error occurred during file decryption: " + e.getMessage());
