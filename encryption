@@ -9,24 +9,18 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.Base64;
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 import java.util.Scanner;
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
 /**
  *
  * @author MyPC
  */
-public class FromScretch {
-    public static final int LenghthOfKey = 256;
-    public static final int iterationCount = 65536;
-    
-    public static void main(String[] args) {
-        Menu2.runMenu();
-    }
-   public static void encrypt(Scanner scanner) {
+public class encrypt {
+    public static void encrypt(Scanner scanner) {
     System.out.println("Encryption method here");
 
     try {
@@ -52,38 +46,44 @@ public class FromScretch {
         keyGen.init(128); // Use 128-bit AES key
         SecretKey secretKey = keyGen.generateKey(); //random secret key is generated and stored in secret key.
 
-        
+        //creating a cipher instance for AES encryption with chains of block ciphertext that makes ecryption more secure
+        //PKCS5Padding makes sure that the plaintext length  is a multiple of the block size by adding padding 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        // now theres initialization of the cipher in encryption mode with the secretKey and ivspec.
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
 
-      
+       // now the information that is in the text file is read into a byte array 
         byte[] fileData = Files.readAllBytes(inputFile.toPath());
 
-       
+       // the file information is encrypted using our initialized cipher
         byte[] cipherText = cipher.doFinal(fileData);
 
-       
+       //a new array called encrypted data is created and it stores the iv and the encrypted information
+       //the iv is copied to the beggining of the encrypted information
+       //then it appends the ciphertext after the iv
         byte[] encryptedData = new byte[iv.length + cipherText.length];
         System.arraycopy(iv, 0, encryptedData, 0, iv.length);
         System.arraycopy(cipherText, 0, encryptedData, iv.length, cipherText.length);
 
-       
-        try (FileOutputStream outputStream = new FileOutputStream("tryciphertext.txt")) {
+       //a file stream is opened to write the encypted data in it and its named ciphertext.txt
+       //a try with resources is used to make sure that the output stream is closed automatically
+        try (FileOutputStream outputStream = new FileOutputStream("ciphertext.txt")) {
             outputStream.write(encryptedData);
         }
 
-       
+        // the raw bytes of the secret key are encoded into a base 64 string for safe storage
         String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
         System.out.println("File encrypted successfully!");
-        System.out.println("Encryption key (copy the key to a safe file ): " + encodedKey);
+        System.out.println("Encryption key (copy the key to a safe file ): " + encodedKey);//key is printed so that user is able to store it in sae place to user later for decryption
         System.out.println("Encrypted file name: tryciphertext.txt");
 
-    } catch (Exception e) {
+    } catch (Exception e) { //catches any errors that may occur during the emcryption process
         System.out.println("An error occurred during file encryption: " + e.getMessage());
         e.printStackTrace();
     }
 }
+    
+}
 
-    }
 
 reference for the code: https://howtodoinjava.com/java/java-security/aes-256-encryption-decryption/
