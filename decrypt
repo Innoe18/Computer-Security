@@ -1,0 +1,99 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package CA2;
+
+/**
+ *
+ * @author MyPC
+ */
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import java.util.Base64;
+import java.util.Scanner;
+
+public class decrypt {
+    public static void decrypt(Scanner scanner) {
+        System.out.println("Decryption begins");
+
+        try {
+           //user is asked to enter the name of the file they want to decrypt 
+            System.out.print("Enter the filename to decrypt: ");
+            String encryptedFileName = scanner.nextLine();
+
+            //creates a file object representing the encrypted file then checks if it exists 
+            File encryptedFile = new File(encryptedFileName);
+            if (!encryptedFile.exists()) {// if file does not exist then message leting the user know is displayed and the program exits the method.
+                System.out.println("Encrypted file not found. Please provide a valid filename. :) ");
+                return;
+            }
+
+           // if file is found user is asked to enter that base64 key 
+            System.out.print("Enter the Base64-encoded key: ");
+            String encodedKey = scanner.nextLine().trim();//using the .trim to remove any accidental spaces 
+            
+             // Validate if the key is empty
+        if (encodedKey.isEmpty()) {
+            System.out.println("Invalid input: The key cannot be empty. Please try again.");
+            return;
+        }
+            
+            // key is converted back to byte array
+             byte[] keyBytes;
+             // using a try catch to try to handle errors that may be found in the key 
+            try {
+           keyBytes = Base64.getDecoder().decode(encodedKey);
+            } catch (IllegalArgumentException e) {
+            System.out.println("Invalid Base64 key format. Please check the key and try again.");
+            return;
+        }
+            // now the SecretKeySpec is used to reconstruct the SecretKey from the decoded byte array with AES specifying the algorithm
+            SecretKey secretKey = new javax.crypto.spec.SecretKeySpec(keyBytes, "AES");
+
+            //reads the entire file into a byte array
+            byte[] encryptedData = Files.readAllBytes(encryptedFile.toPath());
+
+            // the extraction of the iv takes place here 
+            // the first 16 bytes of the file represent the iv 
+            byte[] iv = new byte[16];
+            // the bytes are copied into a new array called iv
+            System.arraycopy(encryptedData, 0, iv, 0, iv.length);
+            //wraps the iv in a an IvParameterSpec object and prepares it for use in the decryption process 
+            IvParameterSpec ivspec = new IvParameterSpec(iv);
+
+            // now the remaining bytes in cipherText file are the encrypted message without the iv because its been extracted  
+            byte[] cipherText = new byte[encryptedData.length - iv.length];
+            System.arraycopy(encryptedData, iv.length, cipherText, 0, cipherText.length);
+
+            // the  creation of  a Cipher object configured for AES encryption in CBC mode with PKCS5 padding.
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            // initializes the cipher for decryption  using the secret key and iv
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
+try {
+           // the process is done and the original text is returned as a byte array 
+            byte[] plainText = cipher.doFinal(cipherText);
+
+         // now the plaintext is written on a file called plaintext
+            try (FileOutputStream outputStream = new FileOutputStream("plaintext.txt")) {
+                outputStream.write(plainText);
+            }
+        //user is alerted that decryption has happened and the name of the file with the plain text 
+            System.out.println("File decrypted successfully!");
+            System.out.println("Decrypted file name: plaintext.txt");
+} catch (javax.crypto.BadPaddingException | javax.crypto.IllegalBlockSizeException ex) {
+                // Handle failures that may occur during decryption 
+                System.out.println("Decryption failed: Invalid key or corrupted data.");
+            }
+            
+            
+        } catch (Exception e) {
+            System.out.println("An error occurred during file decryption: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
