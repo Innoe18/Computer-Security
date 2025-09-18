@@ -1,5 +1,5 @@
 An explanation of how the programme works 
-The main method of the program calls the menu system which allows user to sect 3 options with the first being encryption. When called the corresponding 
+The main method of the program calls the menu system which allows user to select 3 options with the first being encryption. When called the corresponding 
 
 method from the encrypt class is executed . The method uses the try catch blocks to catch any errors that may occur during the encryption process of a file 
 
